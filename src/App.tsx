@@ -26,6 +26,7 @@ import { PuzzleCreatorModal } from './components/PuzzleCreatorModal';
 import { PrintExportModal } from './components/PrintExportModal';
 import { PuzzleLibraryModal } from './components/PuzzleLibraryModal';
 import { CelebrationModal } from './components/CelebrationModal';
+import { LoginPage } from './components/LoginPage';
 import { 
   Check, 
   Eye, 
@@ -57,9 +58,11 @@ export default function App() {
   // Current active puzzle
   const [currentPuzzle, setCurrentPuzzle] = useState<CrosswordPuzzle>(() => puzzles[0]);
 
-  // Auth state
+  // Auth & Session state
   const [user, setUser] = useState<User | null>(null);
-  const [isSyncing, setIsSyncing] = useState(false);
+  const [authChecked, setAuthChecked] = useState<boolean>(false);
+  const [isGuestMode, setIsGuestMode] = useState<boolean>(false);
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
 
   // Playing state
   const [userAnswers, setUserAnswers] = useState<UserAnswers>({});
@@ -89,7 +92,9 @@ export default function App() {
     testConnection();
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      setAuthChecked(true);
       if (currentUser) {
+        setIsGuestMode(false);
         // Fetch user custom puzzles from cloud
         fetchUserPuzzlesFromCloud(currentUser.uid).then(cloudPuzzles => {
           if (cloudPuzzles.length > 0) {
@@ -582,6 +587,8 @@ export default function App() {
   const handleSignOut = async () => {
     try {
       await logOut();
+      setUser(null);
+      setIsGuestMode(false);
     } catch (error) {
       console.error('Sign out error:', error);
     }
@@ -601,8 +608,46 @@ export default function App() {
   const filledLetters = Object.keys(userAnswers).filter(k => userAnswers[k]?.trim()).length;
   const progressPercent = totalLetters > 0 ? Math.min(100, Math.round((filledLetters / totalLetters) * 100)) : 0;
 
+  // Loading state while checking auth
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen bg-stone-950 text-amber-200 flex flex-col items-center justify-center">
+        <div className="w-12 h-12 rounded-2xl bg-amber-500 text-stone-950 flex items-center justify-center font-brand font-bold text-2xl shadow-xl animate-pulse mb-4">
+          CG
+        </div>
+        <p className="font-serif-title text-lg tracking-wide text-stone-300">Loading Crossgen...</p>
+      </div>
+    );
+  }
+
+  // FIRST PAGE: Login Page (when not signed in and not in guest mode)
+  if (!user && !isGuestMode) {
+    return (
+      <LoginPage
+        onSignInWithGoogle={handleSignIn}
+        onContinueAsGuest={() => setIsGuestMode(true)}
+        presetCount={puzzles.length}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-stone-100 text-stone-900 flex flex-col">
+      
+      {/* Guest Mode Alert Banner */}
+      {isGuestMode && (
+        <div className="bg-amber-500/10 border-b border-amber-500/30 px-4 py-2 text-xs text-amber-900 bg-amber-100/90 flex flex-wrap items-center justify-between gap-2 shadow-xs">
+          <span className="font-medium">
+            You are playing in Guest Mode. Answers are stored in your browser.
+          </span>
+          <button
+            onClick={handleSignIn}
+            className="font-bold underline hover:text-amber-950 transition-colors"
+          >
+            Sign in with Google to sync across all devices &rarr;
+          </button>
+        </div>
+      )}
       
       {/* App Header */}
       <Header

@@ -114,7 +114,7 @@ export const PuzzleCreatorModal: React.FC<PuzzleCreatorModalProps> = ({
             </div>
             <div>
               <h2 className="text-xl font-bold font-serif-title text-amber-100">
-                Crossword Puzzle Generator
+                Crossgen Puzzle Generator
               </h2>
               <p className="text-xs text-stone-400">
                 Design custom puzzles with instant grid layout generation

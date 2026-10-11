@@ -316,7 +316,7 @@ export function exportPuzzleToPDF(puzzle: CrosswordPuzzle, options: PrintOptions
     doc.setFontSize(8.5);
     doc.setTextColor(130, 130, 130);
     doc.text(
-      `Crossword Studio  •  Page ${i} of ${totalPages}`,
+      `Crossgen  •  Page ${i} of ${totalPages}`,
       pageWidth / 2,
       pageHeight - (margin / 2),
       { align: 'center' }
