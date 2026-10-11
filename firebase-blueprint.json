@@ -1,0 +1,82 @@
+{
+  "entities": {
+    "CrosswordPuzzle": {
+      "title": "CrosswordPuzzle",
+      "description": "User-created or shared crossword puzzle",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 150
+        },
+        "authorId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "authorName": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "gridData": {
+          "type": "object"
+        },
+        "rawInput": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "createdAt": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "updatedAt": {
+          "type": "string",
+          "maxLength": 64
+        }
+      },
+      "required": ["id", "title", "authorId", "gridData"]
+    },
+    "UserProgress": {
+      "title": "UserProgress",
+      "description": "In-progress solving state and completed status for a puzzle",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "puzzleId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "answers": {
+          "type": "object"
+        },
+        "completed": {
+          "type": "boolean"
+        },
+        "elapsedSeconds": {
+          "type": "number"
+        },
+        "updatedAt": {
+          "type": "string",
+          "maxLength": 64
+        }
+      },
+      "required": ["userId", "puzzleId", "answers", "completed", "elapsedSeconds"]
+    }
+  },
+  "firestore": {
+    "/puzzles/{puzzleId}": {
+      "schema": "CrosswordPuzzle",
+      "description": "Collection of user-created crossword puzzles"
+    },
+    "/users/{userId}/progress/{puzzleId}": {
+      "schema": "UserProgress",
+      "description": "User puzzle solving state synced across devices"
+    }
+  }
+}

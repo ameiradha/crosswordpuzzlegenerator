@@ -1,0 +1,6 @@
+{
+  "name": "Crossword Studio - Generator, Solver & PDF Export",
+  "description": "Create custom crossword puzzles, play online with auto-save and Google sync, export print-ready PDFs and answer keys, and generate puzzle grids automatically.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

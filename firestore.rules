@@ -1,0 +1,46 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidPuzzle(data) {
+      return data.id is string && data.id.size() <= 128 &&
+             data.title is string && data.title.size() <= 150 && data.title.size() > 0 &&
+             data.authorId is string && data.authorId.size() <= 128 &&
+             data.authorId == request.auth.uid &&
+             data.gridData is map;
+    }
+
+    function isValidProgress(data, userId, puzzleId) {
+      return data.userId is string && data.userId == request.auth.uid && data.userId == userId &&
+             data.puzzleId is string && data.puzzleId == puzzleId &&
+             data.answers is map &&
+             data.completed is bool &&
+             data.elapsedSeconds is number;
+    }
+
+    match /puzzles/{puzzleId} {
+      allow get: if true;
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(puzzleId) && isValidPuzzle(request.resource.data);
+      allow update: if isSignedIn() && isValidId(puzzleId) && resource.data.authorId == request.auth.uid && isValidPuzzle(request.resource.data);
+      allow delete: if isSignedIn() && isValidId(puzzleId) && resource.data.authorId == request.auth.uid;
+    }
+
+    match /users/{userId}/progress/{puzzleId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      allow create, update: if isSignedIn() && request.auth.uid == userId && isValidId(puzzleId) && isValidProgress(request.resource.data, userId, puzzleId);
+      allow delete: if isSignedIn() && request.auth.uid == userId;
+    }
+  }
+}
